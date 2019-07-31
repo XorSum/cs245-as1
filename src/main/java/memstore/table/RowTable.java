@@ -10,14 +10,20 @@ import java.util.List;
 /**
  * RowTable, which stores data in row-major format.
  * That is, data is laid out like
- *   row 1 | row 2 | ... | row n.
+ * row 1 | row 2 | ... | row n.
  */
 public class RowTable implements Table {
     protected int numCols;
     protected int numRows;
     protected ByteBuffer rows;
 
-    public RowTable() { }
+    public RowTable() {
+    }
+
+    private int getOffset(int rowId, int colId) {
+        int offset = ByteFormat.FIELD_LEN * ((rowId * numCols) + colId);
+        return offset;
+    }
 
     /**
      * Loads data into the table through passed-in data loader. Is not timed.
@@ -47,7 +53,8 @@ public class RowTable implements Table {
     @Override
     public int getIntField(int rowId, int colId) {
         // TODO: Implement this!
-        return 0;
+        int offset = getOffset(rowId, colId);
+        return this.rows.getInt(offset);
     }
 
     /**
@@ -56,54 +63,82 @@ public class RowTable implements Table {
     @Override
     public void putIntField(int rowId, int colId, int field) {
         // TODO: Implement this!
+        int offset = getOffset(rowId, colId);
+        this.rows.putInt(offset, field);
     }
 
     /**
      * Implements the query
-     *  SELECT SUM(col0) FROM table;
-     *
-     *  Returns the sum of all elements in the first column of the table.
+     * SELECT SUM(col0) FROM table;
+     * <p>
+     * Returns the sum of all elements in the first column of the table.
      */
     @Override
     public long columnSum() {
         // TODO: Implement this!
-        return 0;
+        long sum = 0;
+        for (int rowId = 0; rowId < this.numRows; rowId++) {
+            sum += getIntField(rowId, 0);
+        }
+        return sum;
     }
 
     /**
      * Implements the query
-     *  SELECT SUM(col0) FROM table WHERE col1 > threshold1 AND col2 < threshold2;
-     *
-     *  Returns the sum of all elements in the first column of the table,
-     *  subject to the passed-in predicates.
+     * SELECT SUM(col0) FROM table WHERE col1 > threshold1 AND col2 < threshold2;
+     * <p>
+     * Returns the sum of all elements in the first column of the table,
+     * subject to the passed-in predicates.
      */
     @Override
     public long predicatedColumnSum(int threshold1, int threshold2) {
         // TODO: Implement this!
-        return 0;
+        long sum = 0;
+        for (int rowId = 0; rowId < this.numRows; rowId++) {
+            if (getIntField(rowId, 1) > threshold1
+                    && getIntField(rowId, 2) < threshold2) {
+                sum += getIntField(rowId, 0);
+            }
+        }
+        return sum;
     }
 
     /**
      * Implements the query
-     *  SELECT SUM(col0) + SUM(col1) + ... + SUM(coln) FROM table WHERE col0 > threshold;
-     *
-     *  Returns the sum of all elements in the rows which pass the predicate.
+     * SELECT SUM(col0) + SUM(col1) + ... + SUM(coln) FROM table WHERE col0 > threshold;
+     * <p>
+     * Returns the sum of all elements in the rows which pass the predicate.
      */
     @Override
     public long predicatedAllColumnsSum(int threshold) {
         // TODO: Implement this!
-        return 0;
+        long sum = 0;
+        for (int rowId = 0; rowId < numRows; rowId++) {
+            if (getIntField(rowId, 0) > threshold) {
+                for (int colId = 0; colId < numCols; colId++) {
+                    sum += getIntField(rowId, colId);
+                }
+            }
+        }
+        return sum;
     }
 
     /**
      * Implements the query
-     *   UPDATE(col3 = col1 + col2) WHERE col0 < threshold;
-     *
-     *   Returns the number of rows updated.
+     * UPDATE(col3 = col1 + col2) WHERE col0 < threshold;
+     * <p>
+     * Returns the number of rows updated.
      */
     @Override
     public int predicatedUpdate(int threshold) {
         // TODO: Implement this!
-        return 0;
+        int cnt = 0;
+        for (int rowId = 0; rowId < numRows; rowId++) {
+            if (getIntField(rowId, 0) < threshold) {
+                putIntField(rowId, 3, getIntField(rowId, 1) + getIntField(rowId, 2));
+                cnt++;
+            }
+        }
+        return cnt;
     }
 }
