@@ -6,6 +6,7 @@ import memstore.data.DataLoader;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -91,13 +92,13 @@ public class IndexedRowTable implements Table {
         this.rows.putInt(offset, field);
         if (colId == this.indexColumn) {
             IntArrayList value = this.index.get(origin);
-            value.rem(colId);
+            value.rem(rowId);
             this.index.put(origin, value);
             value = this.index.get(field);
             if (value == null) {
                 value = new IntArrayList();
             }
-            value.add(colId);
+            value.add(rowId);
             this.index.put(field, value);
         }
     }
@@ -208,7 +209,7 @@ public class IndexedRowTable implements Table {
                     cnt++;
                 }
             }
-        } else {
+        }  else {
             for (int rowId = 0; rowId < numRows; rowId++) {
                 if (getIntField(rowId, 0) < threshold) {
                     putIntField(rowId, 3, getIntField(rowId, 1) + getIntField(rowId, 2));
