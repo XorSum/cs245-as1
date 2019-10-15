@@ -38,8 +38,19 @@ public class PredicatedColumnSumTest {
 
     @Test
     public void testIndexedTable() throws IOException {
-        IndexedRowTable it = new IndexedRowTable(0);
-        it.load(dl);
-        assertEquals(49, it.predicatedColumnSum(3, 5));
+        IndexedRowTable it0 = new IndexedRowTable(0);
+        it0.load(dl);
+        assertEquals(49, it0.predicatedColumnSum(3, 5));
+
+        IndexedRowTable it1 = new IndexedRowTable(1);
+        it1.load(dl);
+        assertEquals(49, it1.predicatedColumnSum(3, 5));
+
+
+        IndexedRowTable it2 = new IndexedRowTable(2);
+        it2.load(dl);
+        assertEquals(49, it2.predicatedColumnSum(3, 5));
+
+
     }
 }

@@ -6,7 +6,6 @@ import memstore.data.DataLoader;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -131,8 +130,7 @@ public class IndexedRowTable implements Table {
         // TODO: Implement this!
         long sum = 0;
         if (this.indexColumn == 1) {
-            for (int field : this.index.keySet()) {
-                if (field <= threshold1) continue;
+            for (int field: this.index.tailMap(threshold1+1).keySet()) {
                 for (int rowId : this.index.get(field)) {
                     if (getIntField(rowId, 2) < threshold2) {
                         sum += getIntField(rowId, 0);
@@ -140,8 +138,7 @@ public class IndexedRowTable implements Table {
                 }
             }
         } else if (this.indexColumn == 2) {
-            for (int field : this.index.keySet()) {
-                if (field >= threshold2) continue;
+            for (int field : this.index.headMap(threshold2).keySet()) {
                 for (int rowId : this.index.get(field)) {
                     if (getIntField(rowId, 1) > threshold1) {
                         sum += getIntField(rowId, 0);
@@ -170,8 +167,7 @@ public class IndexedRowTable implements Table {
         // TODO: Implement this!
         long sum = 0;
         if (this.indexColumn == 0) {
-            for (int key : this.index.keySet()) {
-                if (key <= threshold) continue;
+            for (int key : this.index.tailMap(threshold+1).keySet()) {
                 for (int rowId : this.index.get(key)) {
                     for (int colId = 0; colId < numCols; colId++) {
                         sum += getIntField(rowId, colId);
@@ -202,8 +198,7 @@ public class IndexedRowTable implements Table {
 
         int cnt = 0;
         if (this.indexColumn == 0) {
-            for (int key : this.index.keySet()) {
-                if (key >= threshold) continue;
+            for (int key : this.index.headMap(threshold).keySet()) {
                 for (int rowId : this.index.get(key)) {
                     putIntField(rowId, 3, getIntField(rowId, 1) + getIntField(rowId, 2));
                     cnt++;
